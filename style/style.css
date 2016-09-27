@@ -1,0 +1,30 @@
+body {
+  padding: 0px;
+  margin: 0px;
+}
+
+#ScrollFooter{
+  width:100%;
+  height: 30px;
+  background-color: #000;
+}
+
+video{
+  width: 100% !important;
+  max-width: 720px;
+  height: auto !important;
+  margin: 0px;
+  padding: 0px;
+}
+
+.spinner-circle {
+  width: 32px;
+  height: 32px;
+  clear: both;
+  margin: 20px auto;
+  border: 4px rgba(255, 255, 255, 0.25) solid;
+  border-top: 4px white solid;
+  border-radius: 50%;
+  -webkit-animation: spCircRot .6s infinite linear;
+  animation: spCircRot .6s infinite linear;
+}
