@@ -96,35 +96,39 @@ var JSONVideo = {
 var videos;
 var fraction = 0.8;
 var playing = false;
+var timer;
 
 function checkScroll(){
-  playing = false;
-  for(var i = 0; i < videos.length; i++) {
+  clearTimeout(timer);
+  timer = setTimeout(function(){
+    playing = false;
+    for(var i = 0; i < videos.length; i++) {
 
-    var video = videos[i];
+      var video = videos[i];
 
-    var x = video.offsetLeft,
-    y = video.offsetTop,
-    w = video.offsetWidth,
-    h = video.offsetHeight,
-    r = x + w,
-    b = y + h,
-    visibleX,
-    visibleY,
-    visible;
+      var x = video.offsetLeft,
+      y = video.offsetTop,
+      w = video.offsetWidth,
+      h = video.offsetHeight,
+      r = x + w,
+      b = y + h,
+      visibleX,
+      visibleY,
+      visible;
 
-    visibleX = Math.max(0, Math.min(w, window.pageXOffset + window.innerWidth - x, r - window.pageXOffset));
-    visibleY = Math.max(0, Math.min(h, window.pageYOffset + window.innerHeight - y, b - window.pageYOffset));
+      visibleX = Math.max(0, Math.min(w, window.pageXOffset + window.innerWidth - x, r - window.pageXOffset));
+      visibleY = Math.max(0, Math.min(h, window.pageYOffset + window.innerHeight - y, b - window.pageYOffset));
 
-    visible = visibleX * visibleY / (w * h);
+      visible = visibleX * visibleY / (w * h);
 
-    if (visible > fraction && !playing) {
-      video.play();
-      playing = true;
-    } else {
-      video.pause();
+      if (visible > fraction && !playing) {
+        video.play();
+        playing = true;
+      } else {
+        video.pause();
+      }
     }
-  }
+  }, 150)
 }
 
 var VideoContainer = React.createClass({
@@ -132,6 +136,7 @@ var VideoContainer = React.createClass({
     videos = document.getElementsByTagName("video");
     window.addEventListener('scroll', checkScroll, false);
     window.addEventListener('resize', checkScroll, false);
+    window.addEventListener('scroll', this.handleScroll, false);
   },
   getInitialState: function(){
     return{
@@ -157,12 +162,13 @@ var VideoContainer = React.createClass({
     return elements;
   },
   handleInfiniteLoad: function() {
+    console.log("handleInfiniteLoad");
     var that = this;
     this.setState({
       isInfiniteLoading: true
     });
     setTimeout(function(){
-      var elemLength = that.state.elments.length,
+      var elemLength = that.state.elements.length,
       newElements = that.buildElements(elemLength, elemLength + 2);
       that.setState({
         isInfiniteLoading: false,
@@ -175,6 +181,17 @@ var VideoContainer = React.createClass({
     return (
       <div className="spinner-circle"></div>
     );
+  },
+  handleScroll(){
+    const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+    const body = document.body;
+    const html = document.documentElement;
+    const docHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+    const windowBottom = windowHeight + window.pageYOffset + 100;
+
+    if(windowBottom >= docHeight) {
+      this.handleInfiniteLoad();
+    }
   },
   render: function() {
     console.log(this.state);
@@ -210,14 +227,14 @@ var VideoPlayer = React.createClass({
       <div
       className="video-overlay icon-play"
       onClick={this.togglePlay}>
-      <video ref={(el) => {
-        this.videoElement = el;
-      }}
-      onEnded={this.playEnd}
-      onLoadedData={this.playBegin}
-      preload="none">
-      <source src={this.props.source} type="video/mp4" />
-      </video>
+        <video ref={(el) => {
+          this.videoElement = el;
+        }}
+          onEnded={this.playEnd}
+          onLoadedData={this.playBegin}
+          preload="none">
+          <source src={this.props.source} type="video/mp4" />
+        </video>
       </div>
     );
   }
@@ -270,62 +287,6 @@ var Loader = React.createClass({
     return (<div className="spinner-circle"></div>);
   }
 });
-
-// var Play = React.createClass({
-//   propTypes: {
-//     togglePlay: React.PropTypes.func,
-//     paused: React.PropTypes.bool
-//   },
-//   shouldComponentUpdate(nextProps){
-//     return this.props.paused !== nextProps.paused ||
-//     this.props.togglePlay !== nextProps.togglePlay;
-//   },
-//   render() {
-//     return (
-//       <button className="video-play" onClick={this.props.togglePlay}>
-//       {this.props.paused ? <i className="icon-play" /> : <i className="icon-pause" />}
-//       </button>
-//     );
-//   }
-// })
-//
-// var InfinateScrollBottom = React.createClass({
-//   getInitialState: function(){
-//     return{
-//       elements: this.buildElements(0,20),
-//       isInfiniteLoading: false
-//     }
-//   },
-//   buildElements: function(start, end){
-//     var elements = [];
-//     for(var i = start; i < end; i++){
-//       elements.push(<ListItem key={i} />);
-//     }
-//     return elements;
-//   },
-//   handleInfiniteLoad: function() {
-//     var that = this;
-//     this.setState({
-//       isInfiniteLoading: true
-//     });
-//     setTimeout(function() {
-//       var elemLength = that.state.elements.length,
-//       newElements = that.buildElements(elemLength, elemLength + 1000);
-//       that.setState({
-//         isInfiniteLoading: false,
-//         elements: that.state.elements.concat(newElements)
-//       });
-//     }, 2500);
-//   },
-//   elementInfiniteLoad: function() {
-//         return <div className="infinite-list-item">
-//             Loading...
-//         </div>;
-//     },
-//   render: function(){
-//     return (<div id="ScrollFooter"></div>);
-//   }
-// });
 
 ReactDOM.render(
   <div>
