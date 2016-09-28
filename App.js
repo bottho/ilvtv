@@ -151,7 +151,7 @@ var VideoContainer = React.createClass({
       elements.push(
         <div key={"clip_" + i}>
           <h1>{this.props.videoList[i].title}</h1>
-          <VideoPlayer source={this.props.videoList[i].stream.file} thumb={"http://images.castaclip.net/resize/760x428/" + this.props.videoList[i].thumbnail} keyId={i} />
+          <VideoPlayer source={this.props.videoList[i].stream.file} thumb={this.props.videoList[i].thumbnail} keyId={i} />
         </div>
       );
     }
@@ -200,7 +200,9 @@ var VideoPlayer = React.createClass({
     return {
       isPlaying: false,
       hasStarted: false,
-      timeout: null
+      timeout: null,
+      height: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth * 0.66) : 480,
+      width: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth) : 720
     };
   },
   componentDidMount: function(){
@@ -225,6 +227,9 @@ var VideoPlayer = React.createClass({
     else{
       this.pause();
     }
+  },
+  resize(){
+
   },
   playEnd(){
     console.log("content finished");
@@ -265,6 +270,13 @@ var VideoPlayer = React.createClass({
     } else {
       this.pause();
     }
+    console.log("Width: " + document.documentElement.clientWidth);
+    console.log("Width Less than 720: " + document.documentElement.clientWidth < 720);
+    console.log("Width")
+    this.setState({
+      height: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth * 0.66) : 480,
+      width: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth) : 720
+    });
   },
   render: function(){
     return(
@@ -282,7 +294,7 @@ var VideoPlayer = React.createClass({
           onEnded={this.playEnd}
           onLoadedData={this.playBegin}
           preload="none"
-          poster={this.props.thumb}>
+          poster={"http://images.castaclip.net/resize/" + this.state.width + "x" + this.state.height + "/" + this.props.thumb}>
           <source src={this.props.source} type="video/mp4" />
         </video>
       </div>
