@@ -94,9 +94,7 @@ var JSONVideo = {
 };
 
 var videos;
-var fraction = 0.8;
-var playing = false;
-var timer;
+var isPlaying = false;
 
 function checkScroll(){
   clearTimeout(timer);
@@ -122,7 +120,7 @@ function checkScroll(){
       visible = visibleX * visibleY / (w * h);
 
       if (visible > fraction && !playing) {
-        video.play();
+        video.click();
         playing = true;
       } else {
         video.pause();
@@ -134,8 +132,6 @@ function checkScroll(){
 var VideoContainer = React.createClass({
   componentDidMount() {
     videos = document.getElementsByTagName("video");
-    window.addEventListener('scroll', checkScroll, false);
-    window.addEventListener('resize', checkScroll, false);
     window.addEventListener('scroll', this.handleScroll, false);
   },
   getInitialState: function(){
@@ -155,14 +151,13 @@ var VideoContainer = React.createClass({
       elements.push(
         <div key={"clip_" + i}>
           <h1>{this.props.videoList[i].title}</h1>
-          <VideoPlayer source={this.props.videoList[i].stream.file} />
+          <VideoPlayer source={this.props.videoList[i].stream.file} thumb={"http://images.castaclip.net/resize/760x428/" + this.props.videoList[i].thumbnail} keyId={i} />
         </div>
       );
     }
     return elements;
   },
   handleInfiniteLoad: function() {
-    console.log("handleInfiniteLoad");
     var that = this;
     this.setState({
       isInfiniteLoading: true
@@ -194,7 +189,6 @@ var VideoContainer = React.createClass({
     }
   },
   render: function() {
-    console.log(this.state);
       return (
         <div>{this.state.elements}</div>
       );
@@ -202,11 +196,27 @@ var VideoContainer = React.createClass({
 });
 
 var VideoPlayer = React.createClass({
+  getInitialState: function(){
+    return {
+      isPlaying: false,
+      hasStarted: false,
+      timeout: null
+    };
+  },
+  componentDidMount: function(){
+    window.addEventListener('scroll', this.checkScroll, false);
+    window.addEventListener('resize', this.checkScroll, false);
+  },
   play() {
     this.videoElement.play();
+    this.setState({
+      isPlaying: true,
+      hasStarted: true
+    });
   },
   pause(){
     this.videoElement.pause();
+    this.setState({ isPlaying: false });
   },
   togglePlay(){
     if(this.videoElement.paused){
@@ -222,71 +232,63 @@ var VideoPlayer = React.createClass({
   playBegin(){
     console.log("content started");
   },
+  checkScroll(){
+    isPlaying = false;
+    if(this.timeout)
+    {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
+    this.timeout = setTimeout(function(){
+      this.isVisible();
+      this.timeout = null;
+    }.bind(this), 300);
+  },
+  isVisible(){
+    var x = this.videoElement.offsetLeft,
+    y = this.videoElement.offsetTop,
+    w = this.videoElement.offsetWidth,
+    h = this.videoElement.offsetHeight,
+    r = x + w,
+    b = y + h,
+    visibleX,
+    visibleY,
+    visible;
+
+    visibleX = Math.max(0, Math.min(w, window.pageXOffset + window.innerWidth - x, r - window.pageXOffset));
+    visibleY = Math.max(0, Math.min(h, window.pageYOffset + window.innerHeight - y, b - window.pageYOffset));
+
+    visible = visibleX * visibleY / (w * h);
+    if (visible > 0.8 && !this.state.isPlaying && !isPlaying) {
+      this.play();
+      isPlaying = true;
+    } else {
+      this.pause();
+    }
+  },
   render: function(){
     return(
       <div
-      className="video-overlay icon-play"
+      className="video-player"
       onClick={this.togglePlay}>
-        <video ref={(el) => {
-          this.videoElement = el;
-        }}
+        <div
+          style={this.state.isPlaying ? {display:"none"} : {}}
+          className={this.state.hasStarted ? "video-overlay icon-pause" : "video-overlay icon-play" }></div>
+        <video
+          id = {"video_" + this.props.keyId }
+          ref={(el) => {
+            this.videoElement = el;
+          }}
           onEnded={this.playEnd}
           onLoadedData={this.playBegin}
-          preload="none">
+          preload="none"
+          poster={this.props.thumb}>
           <source src={this.props.source} type="video/mp4" />
         </video>
       </div>
     );
   }
 })
-
-var VideoOverlay = React.createClass({
-  propTypes:{
-    error: React.PropTypes.bool,
-    togglePlay: React.PropTypes.func,
-    paused: React.PropTypes.bool,
-    loading: React.PropTypes.bool
-  },
-
-  renderContent(){
-    var content;
-    if(this.props.error)
-    {
-      content = (
-        <div>
-        <p>{this.props.copyKeys.sourceError}</p>
-        </div>
-      )
-    }
-    else if(this.props.loading){
-      content = (
-        <div className="loader">
-        <Loader />
-        </div>
-      )
-    }
-    else {
-      content = (
-        <div className="videoPlay" onClick={this.props.togglePlay}>
-        {this.props.paused ? <i className="icon-pause"></i> : ''}
-        </div>
-      );
-    }
-  },
-  render() {
-    return (
-      <div className="overlay">
-      {this.renderContent()}
-      </div>
-    );
-  }
-})
-
-var Loader = React.createClass({
-  render: function(){
-    return (<div className="spinner-circle"></div>);
-  }
-});
 
 ReactDOM.render(
   <div>

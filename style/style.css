@@ -28,3 +28,12 @@ video{
   -webkit-animation: spCircRot .6s infinite linear;
   animation: spCircRot .6s infinite linear;
 }
+
+.video-overlay {
+  color:white;
+  position:absolute;
+  font-size: 4em;
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+}
