@@ -93,41 +93,30 @@ var JSONVideo = {
   ]
 };
 
+var JSONAds = {
+  "ads":[
+    {
+      "title": "Fantastic Four",
+      "file": "resources/Fantastic Four - Rise of the Silver Surfer - Trailer.mp4"
+    },
+    {
+      "title": "Serenity",
+      "file": "resources/Serenity - HD DVD Trailer.mp4"
+    },
+    {
+      "title": "The Bourne Ultimatum",
+      "file": "resources/The Bourne Ultimatum - Trailer.mp4"
+    },
+    {
+      "title": "The Simpsons Movie",
+      "file": "resources/The Simpsons Movie - Trailer.mp4"
+    }
+  ]
+};
+
 var videos;
 var isPlaying = false;
-
-function checkScroll(){
-  clearTimeout(timer);
-  timer = setTimeout(function(){
-    playing = false;
-    for(var i = 0; i < videos.length; i++) {
-
-      var video = videos[i];
-
-      var x = video.offsetLeft,
-      y = video.offsetTop,
-      w = video.offsetWidth,
-      h = video.offsetHeight,
-      r = x + w,
-      b = y + h,
-      visibleX,
-      visibleY,
-      visible;
-
-      visibleX = Math.max(0, Math.min(w, window.pageXOffset + window.innerWidth - x, r - window.pageXOffset));
-      visibleY = Math.max(0, Math.min(h, window.pageYOffset + window.innerHeight - y, b - window.pageYOffset));
-
-      visible = visibleX * visibleY / (w * h);
-
-      if (visible > fraction && !playing) {
-        video.click();
-        playing = true;
-      } else {
-        video.pause();
-      }
-    }
-  }, 150)
-}
+var currentAd = 0;
 
 var VideoContainer = React.createClass({
   componentDidMount() {
@@ -150,8 +139,8 @@ var VideoContainer = React.createClass({
     {
       elements.push(
         <div key={"clip_" + i}>
-          <h1>{this.props.videoList[i].title}</h1>
-          <VideoPlayer source={this.props.videoList[i].stream.file} thumb={this.props.videoList[i].thumbnail} keyId={i} />
+        <h1>{this.props.videoList[i].title}</h1>
+        <VideoPlayer source={this.props.videoList[i].stream.file} thumb={this.props.videoList[i].thumbnail} keyId={i} />
         </div>
       );
     }
@@ -189,9 +178,9 @@ var VideoContainer = React.createClass({
     }
   },
   render: function() {
-      return (
-        <div>{this.state.elements}</div>
-      );
+    return (
+      <div>{this.state.elements}</div>
+    );
   }
 });
 
@@ -201,6 +190,7 @@ var VideoPlayer = React.createClass({
       isPlaying: false,
       hasStarted: false,
       timeout: null,
+      hasPlayedAd: false,
       height: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth * 0.66) : 480,
       width: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth) : 720
     };
@@ -211,10 +201,18 @@ var VideoPlayer = React.createClass({
   },
   play() {
     this.videoElement.play();
-    this.setState({
-      isPlaying: true,
-      hasStarted: true
-    });
+    if(this.state.hasPlayedAd)
+    {
+      this.setState({
+        isPlaying: true
+      })
+    }
+    else {
+      this.setState({
+        isPlaying: true,
+        hasStarted: true
+      });
+    }
   },
   pause(){
     this.videoElement.pause();
@@ -228,8 +226,21 @@ var VideoPlayer = React.createClass({
       this.pause();
     }
   },
-  resize(){
-
+  adBegin(){
+    console.log("ad started");
+  },
+  adEnd(){
+    console.log("ad finished");
+    this.setState({
+      hasPlayedAd: true
+    });
+    if(currentAd < JSONAds.ads.length)
+    {
+      currentAd++;
+    }
+    else {
+      currentAd = 0;
+    }
   },
   playEnd(){
     console.log("content finished");
@@ -278,25 +289,31 @@ var VideoPlayer = React.createClass({
       width: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth) : 720
     });
   },
+  componentDidUpdate(prevProps, prevState){
+    if(!prevState.hasPlayedAd && this.state.hasPlayedAd)
+    {
+      this.play();
+    }
+  },
   render: function(){
     return(
       <div
       className="video-player"
       onClick={this.togglePlay}>
-        <div
-          style={this.state.isPlaying ? {display:"none"} : {}}
-          className={this.state.hasStarted ? "video-overlay icon-pause" : "video-overlay icon-play" }></div>
-        <video
-          id = {"video_" + this.props.keyId }
-          ref={(el) => {
-            this.videoElement = el;
-          }}
-          onEnded={this.playEnd}
-          onLoadedData={this.playBegin}
-          preload="none"
-          poster={"http://images.castaclip.net/resize/" + this.state.width + "x" + this.state.height + "/" + this.props.thumb}>
-          <source src={this.props.source} type="video/mp4" />
-        </video>
+      <div
+      style={this.state.isPlaying ? {display:"none"} : {}}
+      className={this.state.hasStarted ? "video-overlay icon-pause" : "video-overlay icon-play" }></div>
+      <video
+      src= { this.state.hasPlayedAd ? this.props.source : JSONAds.ads[currentAd].file }
+      id = {"video_" + this.props.keyId }
+      ref={(el) => {
+        this.videoElement = el;
+      }}
+      onEnded={ this.state.hasPlayedAd ? this.playEnd : this.adEnd }
+      onLoadedData={ this.state.hasPlayedAd ? this.playBegin : this.adBegin }
+      preload="none"
+      poster={"http://images.castaclip.net/resize/" + this.state.width + "x" + this.state.height + "/" + this.props.thumb}>
+      </video>
       </div>
     );
   }
