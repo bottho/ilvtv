@@ -37,3 +37,22 @@ video{
   width: 100px;
   height: 100px;
 }
+
+.video-container{
+  max-width: 720px;
+  margin:0 auto;
+  height:500px;
+}
+
+h1 {
+  font-family: sans-serif;
+  padding: 2%;
+  margin: 2% 0 0;
+  background-color: #CCC;
+  color: #fff;
+}
+
+.isPlaying
+{
+  border-top: solid 5px #C00;
+}

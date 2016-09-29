@@ -6,7 +6,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_1mb.mp4"
+        "file": "resources/Fantastic Four - Rise of the Silver Surfer - Trailer.mp4"
       }
     },
     {
@@ -15,7 +15,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_2mb.mp4"
+        "file": "resources/Serenity - HD DVD Trailer.mp4"
       }
     },
     {
@@ -24,7 +24,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_5mb.mp4"
+        "file": "resources/The Bourne Ultimatum - Trailer.mp4"
       }
     },
     {
@@ -33,7 +33,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_1mb.mp4"
+        "file": "resources/The Simpsons Movie - Trailer.mp4"
       }
     },
     {
@@ -42,7 +42,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_2mb.mp4"
+        "file": "resources/Serenity - HD DVD Trailer.mp4"
       }
     },
     {
@@ -51,7 +51,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_1mb.mp4"
+        "file": "resources/The Simpsons Movie - Trailer.mp4"
       }
     },
     {
@@ -60,7 +60,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_2mb.mp4"
+        "file": "resources/The Bourne Ultimatum - Trailer.mp4"
       }
     },
     {
@@ -69,7 +69,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_1mb.mp4"
+        "file": "resources/Fantastic Four - Rise of the Silver Surfer - Trailer.mp4"
       }
     },
     {
@@ -78,7 +78,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_2mb.mp4"
+        "file": "resources/The Simpsons Movie - Trailer.mp4"
       }
     },
     {
@@ -87,7 +87,7 @@ var JSONVideo = {
       "stream": {
         "protocol": "rtmp",
         "streamer": "fms.edge.cdn.castaclip.net",
-        "file": "resources/SampleVideo_1280x720_2mb.mp4"
+        "file": "resources/Serenity - HD DVD Trailer.mp4"
       }
     }
   ]
@@ -96,20 +96,16 @@ var JSONVideo = {
 var JSONAds = {
   "ads":[
     {
-      "title": "Fantastic Four",
-      "file": "resources/Fantastic Four - Rise of the Silver Surfer - Trailer.mp4"
+      "title": "1mb Ad",
+      "file": "resources/SampleVideo_1280x720_1mb.mp4"
     },
     {
-      "title": "Serenity",
-      "file": "resources/Serenity - HD DVD Trailer.mp4"
+      "title": "2mb Ad",
+      "file": "resources/SampleVideo_1280x720_2mb.mp4"
     },
     {
-      "title": "The Bourne Ultimatum",
-      "file": "resources/The Bourne Ultimatum - Trailer.mp4"
-    },
-    {
-      "title": "The Simpsons Movie",
-      "file": "resources/The Simpsons Movie - Trailer.mp4"
+      "title": "5mb Ad",
+      "file": "resources/SampleVideo_1280x720_5mb.mp4"
     }
   ]
 };
@@ -179,7 +175,7 @@ var VideoContainer = React.createClass({
   },
   render: function() {
     return (
-      <div>{this.state.elements}</div>
+      <div className="video-container">{this.state.elements}</div>
     );
   }
 });
@@ -216,7 +212,9 @@ var VideoPlayer = React.createClass({
   },
   pause(){
     this.videoElement.pause();
-    this.setState({ isPlaying: false });
+    this.setState({
+      isPlaying: false
+    });
   },
   togglePlay(){
     if(this.videoElement.paused){
@@ -281,9 +279,6 @@ var VideoPlayer = React.createClass({
     } else {
       this.pause();
     }
-    console.log("Width: " + document.documentElement.clientWidth);
-    console.log("Width Less than 720: " + document.documentElement.clientWidth < 720);
-    console.log("Width")
     this.setState({
       height: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth * 0.66) : 480,
       width: document.documentElement.clientWidth < 720 ? Math.floor(document.documentElement.clientWidth) : 720
@@ -304,6 +299,7 @@ var VideoPlayer = React.createClass({
       style={this.state.isPlaying ? {display:"none"} : {}}
       className={this.state.hasStarted ? "video-overlay icon-pause" : "video-overlay icon-play" }></div>
       <video
+      className = {this.state.isPlaying ? "isPlaying" : ""}
       src= { this.state.hasPlayedAd ? this.props.source : JSONAds.ads[currentAd].file }
       id = {"video_" + this.props.keyId }
       ref={(el) => {
@@ -317,7 +313,7 @@ var VideoPlayer = React.createClass({
       </div>
     );
   }
-})
+});
 
 ReactDOM.render(
   <div>
